@@ -1,6 +1,6 @@
 const passport = require("passport");
 const passportJWT = require("passport-jwt");
-const { findUserForToken } = require("../service/userMongo");
+const { findUserForToken } = require("../service/usersMongo");
 require("dotenv").config();
 
 const secret = process.env.SECRET;
