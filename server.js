@@ -1,22 +1,17 @@
-const app = require("./app");
-require("dotenv").config();
 const mongoose = require("mongoose");
 
-const DB_CONTACTS = process.env.DB_CONTACTS;
+const app = require("./app");
 
-const connection = mongoose.connect(DB_CONTACTS, {
-  dbName: "db-contacts",
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+const { DB_HOST, PORT = 3000 } = process.env;
 
-connection
-  .then(() => {
-    app.listen(3000, () => {
-      console.log("Database connection successful");
-    });
-  })
+mongoose.set("strictQuery", true);
+
+mongoose
+  .connect(DB_HOST)
+  .then(() =>
+    app.listen(PORT, () => console.log("Database connection successful"))
+  )
   .catch((err) => {
-    console.error(err);
+    console.log(err.message);
     process.exit(1);
   });
