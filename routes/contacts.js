@@ -1,5 +1,5 @@
 const express = require("express");
-const { auth } = require("../../middleweres/jwtStrategy");
+const { auth } = require("../middleweres/jwtStrategy");
 
 const {
   get,
@@ -8,7 +8,7 @@ const {
   putEditCont,
   patchFav,
   deleteCont,
-} = require("../../controlers/contacts");
+} = require("../controlers/contacts");
 
 const router = express.Router();
 

@@ -1,10 +1,11 @@
 const User = require("../models/user.schem");
 
-const addUser = async (password, email, subscription) => {
+const addUser = async (password, email, avatarUrl, subscription) => {
   const user = await User.create({
     password: password,
     email: email,
     subscription: subscription,
+    avatarUrl: avatarUrl,
   });
   return user;
 };
@@ -27,10 +28,16 @@ const deleteJwtInDb = async (userId) => {
   return null;
 };
 
+const pathAvatarInDb = async (userId, avatarUrl) => {
+  const avatar = await User.findByIdAndUpdate(userId, avatarUrl, { new: true });
+  return avatar;
+};
+
 module.exports = {
   addUser,
   findUserByMail,
   findUserForToken,
   setJwtInDb,
   deleteJwtInDb,
+  pathAvatarInDb,
 };
