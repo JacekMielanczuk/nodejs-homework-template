@@ -20,6 +20,9 @@ const user = new Schema({
     type: String,
     default: null,
   },
+  avatarUrl: {
+    type: String,
+  },
 });
 
 const User = mongoose.model("user", user, "users");
