@@ -108,21 +108,48 @@ const login = async (req, res, next) => {
   });
 };
 
+// const current = async (req, res, next) => {
+//   const { email, avatarURL, verificationToken } = req.user;
+//   res.json({
+//     status: "success",
+//     code: 200,
+//     data: {
+//       email: `${email}`,
+//       subscription: "starter",
+//       avatarURL: `${avatarURL}`,
+//       verificationToken: `${verificationToken}`,
+//       user: `${req.user}`,
+//     },
+//   });
+// };
+// początek poprawionego kodu
 const current = async (req, res, next) => {
-  const { email, avatarURL, verificationToken } = req.user;
-  res.json({
-    status: "success",
-    code: 200,
-    data: {
-      email: `${email}`,
-      subscription: "starter",
-      avatarURL: `${avatarURL}`,
-      verificationToken: `${verificationToken}`,
-      user: `${req.user}`,
-    },
-  });
-};
+  try {
+    if (!req.user) {
+      throw new Error("User not authenticated");
+    }
 
+    const { email, avatarURL, verificationToken } = req.user;
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        email,
+        subscription: "starter",
+        avatarURL,
+        verificationToken,
+        user: req.user,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+};
+// koniec poprawionego kodu
 const logout = async (req, res, next) => {
   const { id } = req.user;
   try {
