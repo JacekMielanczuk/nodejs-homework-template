@@ -1,3 +1,5 @@
+const { nanoid } = require("nanoid");
+const sgMail = require("../utils/sendemail");
 const User = require("../models/user.model");
 const validateUser = require("../utils/validation");
 const { userLogout } = require("../service/users.service");
@@ -38,13 +40,18 @@ const signUp = async (req, res, next) => {
       true
     );
 
-    const newUser = new User({ email, avatarURL });
+    const verificationToken = nanoid();
+
+    const newUser = new User({ email, avatarURL, verificationToken });
 
     console.log(newUser);
     newUser.setPassword(password);
     /* newUser.set("avatarURL", avatarURL, String); */
 
     await newUser.save();
+    if (verificationToken) {
+      sgMail.sendVerificationToken(email, verificationToken);
+    }
 
     res.json({
       status: "success",
@@ -75,6 +82,14 @@ const login = async (req, res, next) => {
     });
   }
 
+  if (!user.verify) {
+    return res.status(401).json({
+      status: "Unauthorized",
+      code: 401,
+      message: "Please verify Your account first",
+    });
+  }
+
   const payload = {
     id: user.id,
   };
@@ -94,7 +109,7 @@ const login = async (req, res, next) => {
 };
 
 const current = async (req, res, next) => {
-  const { email, avatarURL } = req.user;
+  const { email, avatarURL, verificationToken } = req.user;
   res.json({
     status: "success",
     code: 200,
@@ -102,6 +117,8 @@ const current = async (req, res, next) => {
       email: `${email}`,
       subscription: "starter",
       avatarURL: `${avatarURL}`,
+      verificationToken: `${verificationToken}`,
+      user: `${req.user}`,
     },
   });
 };
@@ -155,4 +172,67 @@ const updateAvatar = async (req, res, next) => {
   }
 };
 
-module.exports = { signUp, login, current, logout, updateAvatar };
+const verify = async (req, res, next) => {
+  const { verificationToken } = req.params;
+  try {
+    const user = await service.updateVerificationToken(verificationToken);
+    if (user) {
+      res.status(200).json({
+        status: "success",
+        code: 200,
+        message: "Verification succesful",
+      });
+    } else {
+      res.status(404).json({
+        status: "error",
+        code: 404,
+        message: `User not found`,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resendVerificationMail = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400).json({ message: "missing required field email" });
+  }
+
+  const user = await User.findOne({ email });
+  // const user = await service.getUser({ email });
+
+  if (!user) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Incorrect email ",
+    });
+  }
+  if (user.verify) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Verification has already been passed",
+    });
+  }
+  if (!user.verify) {
+    sgMail.sendVerificationToken(email, user.verificationToken);
+    return res.status(200).json({
+      status: "succeess",
+      code: 200,
+      message: "Verification email sent",
+    });
+  }
+};
+
+module.exports = {
+  signUp,
+  login,
+  current,
+  logout,
+  updateAvatar,
+  verify,
+  resendVerificationMail,
+};

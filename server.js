@@ -1,15 +1,11 @@
 const app = require("./app");
 require("dotenv").config();
-const {
-  createFolderIfNotExist,
-  uploadDir,
-  imageStore,
-} = require("./upload.js");
+const { createFolderIfNotExist, uploadDir, imageStore } = require("./upload");
 
 const mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 const uriDb = process.env.DATABASE_URL;
 const connection = mongoose.connect(uriDb, {
   useNewUrlParser: true,

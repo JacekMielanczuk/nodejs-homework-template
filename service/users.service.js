@@ -7,4 +7,11 @@ const updateAvatar = async (userId, avatarURL) => {
   return User.findByIdAndUpdate(userId, { avatarURL });
 };
 
-module.exports = { userLogout, updateAvatar };
+const updateVerificationToken = async (verificationToken) => {
+  return User.findOneAndUpdate(
+    { verificationToken },
+    { verify: true, verificationToken: null }
+  );
+};
+
+module.exports = { userLogout, updateAvatar, updateVerificationToken };
